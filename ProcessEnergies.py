@@ -7,7 +7,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import string
 
-
 csvfiles = [os.path.join(root, name) for root, dirs, files in os.walk("./") for name in files if name.endswith((".csv")) and name[-12:] != "template.csv"]
 
 
