@@ -89,7 +89,8 @@ with PdfPages('data.pdf') as pdf:
         xl = [min(x), max(x)]
         yl = [slope*xx + intercept for xx in xl]
         plt.plot(xl, yl, '-r')
-
+        plt.xlabel('energy')
+        plt.ylabel('efficiency')
         plt.title(str(plotting[i]))
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
