@@ -7,9 +7,12 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import string
 
+
+#creates a list of all the csv files in the directory excluding the template
 csvfiles = [os.path.join(root, name) for root, dirs, files in os.walk("./") for name in files if name.endswith((".csv")) and name[-12:] != "template.csv"]
 
 
+#creates a dictionary associating each file with a list of its data
 data = {}
 for file in csvfiles:
     data[file] = []
@@ -20,9 +23,11 @@ for file in csvfiles:
         for i in range(1,7):
             data[file][i] = int(data[file][i])
         for i in range(7,16):
-
             data[file][i] = float(filter(lambda x: x in string.printable, data[file][i]))
 
+
+#combines the data into a dictionary keyed with names representing a chart
+# with a value as a list of lists of the data for a particular graph
 charts = {}
 for item in data:
     if data[item][16] not in charts:
@@ -30,23 +35,41 @@ for item in data:
     else:
         charts[data[item][16]].append(data[item])
 
+
+# processes the data and calculations outputting tuples (pairs) of results to plot
 datatoplot = {}
 for date in charts:
     datatoplot[date] = []
+    #memoize some of the processing
+    processed = {}
+    def findexpectation(setofdata,processed):
+        activity = setofdata[7] * math.e ** (-math.log(2) * time / setofdata[8])
+        s = setofdata[11]
+        r = setofdata[12]
+        solidangle = s ** 2 / (4 * math.pi * r ** 2)
+        expec = 37000 * activity * setofdata[10] * setofdata[13] * solidangle
+        processed[(time, setofdata[10], setofdata[13], setofdata[11], setofdata[12])] = expec
+        return expec
+
     for setofdata in charts[date]:
-        energy = setofdata[9]
         end = datetime(setofdata[4], setofdata[5], setofdata[6])
         start = datetime(setofdata[1], setofdata[2], setofdata[3])
         difference = end - start
-        time = (difference.days + difference.seconds/86400)/365.2425
-        activity = setofdata[7]*math.e**(-math.log(2)*time/setofdata[8])
-        s = setofdata[11]
-        r = setofdata[12]
-        solidangle = s**2 / (4 * math.pi * r**2)
-        expectation = 37000 * activity * setofdata[10] * setofdata[13] * solidangle
+        time = (difference.days + difference.seconds / 86400) / 365.2425
+        energy = setofdata[9]
+        #check memoized data
+        if (time, setofdata[10], setofdata[13], setofdata[11], setofdata[12]) in processed:
+            expectation = processed[(time, setofdata[10], setofdata[13], setofdata[11], setofdata[12])]
+        #in case not already calculated, then calculate
+        else:
+            expectation = findexpectation(setofdata, processed)
         experimental = setofdata[14]
         efficiency = experimental / expectation
         datatoplot[date].append((energy, efficiency))
+
+
+
+#outputs data and graphs onto a pdf
 
 with PdfPages('data.pdf') as pdf:
     plotting = sorted(datatoplot)
