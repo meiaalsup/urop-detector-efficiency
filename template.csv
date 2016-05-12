@@ -1,0 +1,17 @@
+Sample (ie Co60)
+dateA_0measured_year
+dateA_0measured_month
+dateA_0measured_day
+dateofexperiment_year
+dateofexperiment_month
+dateofexperiment_day
+A_0
+half-life
+energy (i.e. 1173)
+time experiment is run (i.e. 300sec)
+s
+r
+percentdecay
+ADAQdata
+ADAQerror
+DataBatchMarker/Date (i.e. files with same label here will be on same graph)
