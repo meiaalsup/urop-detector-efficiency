@@ -2,10 +2,11 @@ import csv
 import os
 import math
 from datetime import datetime
+import string
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
-import string
+from scipy.stats import linregress
 
 
 #creates a list of all the csv files in the directory excluding the template
@@ -70,9 +71,9 @@ for date in charts:
 
 
 #outputs data and graphs onto a pdf
-
 with PdfPages('data.pdf') as pdf:
     plotting = sorted(datatoplot)
+
     for i in range(len(datatoplot)):
         x = []
         y = []
@@ -89,13 +90,30 @@ with PdfPages('data.pdf') as pdf:
         xl = [min(x), max(x)]
         yl = [slope*xx + intercept for xx in xl]
         plt.plot(xl, yl, '-r')
+
+        #analyze data
+        slope, intercept, rcorrelation, pcorrelation, stderr = linregress(x, y)
+        #output y=mx+b and r^2 onto graph pdf
+        plt.text(0, .95, "y = " + str(slope) + "x + " + str(intercept) + ", r squared = " + str(rcorrelation))
+
+        #output data points as text (ordered pairs) onto graph
+        texts = {}
+        for j in range(len(datatoplot[plotting[i]])):
+            plt.text(0, .85 - j*.1 , datatoplot[plotting[i]][j])
+
+        #label axes
         plt.xlabel('energy')
         plt.ylabel('efficiency')
+        
+        #set limits of x and y axes
+        plt.ylim([0, 1])
+        plt.xlim([0, 1400])
+
+        #plot title
         plt.title(str(plotting[i]))
+
         pdf.savefig()  # saves the current figure into a pdf page
         plt.close()
-
-
 
 
 
